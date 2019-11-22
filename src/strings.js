@@ -3,6 +3,8 @@ export function formatString(value, ...args) {
     for (let i in args) {
         const param = new RegExp(`{[${i}]}`, 'g')        
         result = result.replace(param, args[i])
+        console.log(result);
+        
     }
     return result
 }

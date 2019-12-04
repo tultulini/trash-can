@@ -5,21 +5,23 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "compile": "babel-watch src --out-dir .compiled --source-maps --watch"
+    "compile": "babel src --out-dir .compiled --source-maps --watch"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "aws-sdk": "^2.559.0",
-    "core-js": "^3.4.0",
+    "aws-sdk": "^2.582.0",
+    "core-js": "^3.4.7",
+    "fs": "0.0.1-security",
+    "jsonwebtoken": "^8.5.1",
+    "jwk-to-pem": "^2.0.1",
     "uuid": "^3.3.3"
   },
   "devDependencies": {
-    "@babel/cli": "^7.7.0",
-    "@babel/core": "^7.7.2",
-    "@babel/plugin-transform-arrow-functions": "^7.2.0",
-    "@babel/preset-env": "^7.7.1",
-    "babel-watch": "^7.0.0"
+    "@babel/cli": "^7.7.4",
+    "@babel/core": "^7.7.4",
+    "@babel/plugin-transform-arrow-functions": "^7.7.4",
+    "@babel/preset-env": "^7.7.4"
   },
   "babel": {
     "presets": [

@@ -15,6 +15,7 @@ function formatString(value) {
   for (var i in args) {
     var param = new RegExp("{[".concat(i, "]}"), 'g');
     result = result.replace(param, args[i]);
+    console.log(result);
   }
 
   return result;

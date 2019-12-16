@@ -29,7 +29,10 @@
         "@babel/preset-env",
         {
           "useBuiltIns": "entry",
-          "corejs": "3.4.0"
+          "corejs": "3.4.0",
+          "targets":{
+            "node":"current"
+          }
         }
       ]
     ],

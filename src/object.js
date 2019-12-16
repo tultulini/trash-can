@@ -1,8 +1,12 @@
-export function safePropGetter(obj, path) {
-    if (!obj || !path)
+export function proper(obj, pathToAction) {
+    if (isNullOrUndefined(obj) || isNullOrUndefined(pathToAction)) {
+        if (raiseErrorOnFailure) {
+            throw new Error('Need base object and pathToAction')
+        }
         return null
+    }
 
-    const pathComponents = (path + '')
+    const pathComponents = (pathToAction + '')
         .replace(/[/][/].*$/mg, '') // strip single-line comments
         .replace(/\s+/g, '') // strip white space
         .replace(/[/][*][^/*]*[*][/]/g, '') // strip multi-line comments  
@@ -11,21 +15,56 @@ export function safePropGetter(obj, path) {
         .split(',').filter(Boolean); // split & filter [""]
 
     let currentStep = obj
+    const stepCount = pathComponents.length
+    let catchFunc
+
+
+    let elseFunc
+    const emptyFunc = () => { }
     let step = 0
-    let error = undefined
-    const params = pathComponents.map(par => {
-        currentStep = currentStep && currentStep[par] ? currentStep[par] : null
-        if (!error && !currentStep) {
-            error = { step, paramName: par }
+    const params = pathComponents.map(prop => {
+        if (!currentStep) {
+            return null
+        }
+
+        currentStep = currentStep[prop]
+        if (isNullOrUndefined(currentStep) && step < stepCount - 1) {
+            elseFunc = emptyFunc
+            catchFunc = (pred) => {
+                pred(prop, step)
+            }
         }
         step++
         return currentStep
     })
 
-    const func = !error && (typeof path === "function")
-        ? (() => path.apply(null, params))
-        : undefined
+    if (!catchFunc) {
 
-    return { res: params[params.length - 1], func, error }
+        if (isNullOrUndefined(params[params.length - 1])) {
+            elseFunc = pred => {
+                pred()
+            }
+        }
+        else {
+            pathToAction.apply(null, params)
+            elseFunc = emptyFunc
+        }
+        catchFunc = emptyFunc
+    }
+    const ret = {}
 
-}  
+    ret.else = (pred) => {
+        elseFunc(pred);
+        return ret
+    }
+    ret.catch = (pred) => {
+        catchFunc(pred);
+        return ret
+    }
+    return ret
+
+}
+
+export function isNullOrUndefined(val) {
+    return val === null || val === undefined
+}

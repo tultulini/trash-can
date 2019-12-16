@@ -1,4 +1,4 @@
-import { safePropGetter } from "./object"
+import { proper } from "./object"
 
 const user = { cat: { name: 'schupid', singy: () => console.log('meooooooww mother fucker') } }
 
@@ -7,14 +7,17 @@ const capitalize = (s) => {
     return s.charAt(0).toUpperCase() + s.slice(1)
 }
 
-const c = safePropGetter(user, (cat, name) => {
+proper(user, (cat, name) => {
     const isMute = cat.sing === null | cat.sing === undefined
-    return `${capitalize(name)} can ${isMute ? 'not ' : ''}sing`
+    console.log(`${capitalize(name)} can ${isMute ? 'not ' : ''}sing`)
 })
+    .else(_ => {
+        console.log('else hit')
+    })
+    .catch((prop, step) => {
+        console.log(`missing prop: ${prop} at step: ${step}`)
+    })
 
-if (!c.error) {
-    console.log(`${c.res} exists and FYI: ${c.func()}`)
-}
 
 
 

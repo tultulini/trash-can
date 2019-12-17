@@ -1,7 +1,11 @@
+import { isPromise, wrapPromiseForResult } from "./promises"
 
 export const properAsync = async (obj, pathToAction) => {
-    return await pathToAction()
+    console.log(`isAsync: ${isAsync(pathToAction)}`)
+    const f = pathToAction()
+    return f
 }
+
 export function proper(obj, pathToAction) {
     if (isNullOrUndefined(obj) || isNullOrUndefined(pathToAction)) {
         if (raiseErrorOnFailure) {
@@ -17,52 +21,57 @@ export function proper(obj, pathToAction) {
     const emptyFunc = () => { }
 
     const { params, pathError } = getPathParamValues(obj, pathToAction)
-
+    let runPathToAction = false
     if (pathError) {
         elseFunc = emptyFunc
         catchFunc = (pred) => {
-            pred(prop, step)
+            return pred(pathError.prop, pathError.step)
         }
     }
     else {
-
         if (isNullOrUndefined(params[params.length - 1])) {
-            const f = pathToAction(params[0], params[2])
-            f()
             elseFunc = pred => {
-                pred()
+                return pred()
             }
         }
         else {
+            runPathToAction = true
+
             elseFunc = emptyFunc
         }
         catchFunc = emptyFunc
     }
 
-    const ret = {}
+    const result = {}
 
 
-    ret.else = (pred) => {
-        elseFunc(pred);
-        return ret
-    }
-    ret.catch = (pred) => {
-        catchFunc(pred);
-        return ret
+    result.else = (pred) => {
+        const fun = elseFunc(pred)
+        return isPromise(fun)
+            ? wrapPromiseForResult(fun, result)
+            : result
     }
 
-    if (!isAsyncFun) {
-        return ret
+    result.catch = (pred) => {
+        const fun = catchFunc(pred);
+        return isPromise(fun)
+            ? wrapPromiseForResult(fun, result)
+            : result
+    }
+
+    let ret
+    if (isAsyncFun) {
+        ret = runPathToAction
+            ? wrapPromiseForResult(pathToAction.apply(null, params), result)
+            : Promise.resolve(result)
     }
     else {
-        return new Promise((resolve, reject) => {
-            pathToAction.apply(null, params)
-                .then(_ => resolve(ret))
-                .catch(err => reject(err))
-        })
+        ret = result
     }
-
+    return ret
 }
+
+
 
 function getFunctionArgs(func) {
     return (func + '')
